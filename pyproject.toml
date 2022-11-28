@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fastapiframework"
+version = "0.1.3"
+requires-python = ">=3.11"
+description = "A flexible logging abstraction layer"
+readme = "README.md"
+license = { file="LICENSE" }
+dynamic = ["dependencies"]
+
+
+[project.urls]
+"Homepage" = "https://github.com/strivesolutions/python-fastapi-framework"
+"Bug Tracker" = "https://github.com/strivesolutions/python-fastapi-framework/issues"
