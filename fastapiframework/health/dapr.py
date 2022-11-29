@@ -1,4 +1,4 @@
-import httpx
+import requests
 
 from fastapiframework.health.health_check_result import HealthCheckResult
 from fastapiframework.health.health_checker import HealthChecker
@@ -8,7 +8,7 @@ def create_dapr_health_check(endpoint: str) -> HealthChecker:
     def run(name: str) -> HealthCheckResult:
         url = f"{endpoint}/v1.0/healthz"
         try:
-            resp = httpx.get(url)
+            resp = requests.get(url)
 
             return (
                 HealthCheckResult.ok(name)

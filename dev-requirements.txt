@@ -4,8 +4,10 @@ black
 build
 flake8
 flake8-bugbear
+httpx
 isort
 mypy
 pytest
 pytest-asyncio
 twine
+types-requests

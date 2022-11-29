@@ -2,7 +2,7 @@ import asyncio
 from typing import Any, Coroutine, List
 
 from asyncer import asyncify
-from fastapi import FastAPI, Response
+from fastapi import Response
 
 from fastapiframework.health.config import get_health_config
 from fastapiframework.health.health_check_result import HealthCheckResult
