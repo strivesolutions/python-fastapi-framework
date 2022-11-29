@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 from fastapiframework.models.camel_case_model import CamelCaseModel
 
@@ -15,6 +15,10 @@ class HealthCheckResult(CamelCaseModel):
     check_name: str  # TODO: ignore in json export
     status: HealthCheckStatus
     error_details: Optional[str] = None
+
+    def dict(self, *args: Any, **kwargs: Any) -> dict:
+        kwargs["exclude_none"] = True
+        return super().dict(*args, **kwargs)
 
     @staticmethod
     def ok(check_name: str) -> HealthCheckResult:

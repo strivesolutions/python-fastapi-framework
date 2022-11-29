@@ -28,5 +28,4 @@ def create_app(
 
     app.mount("/healthz", health_app)
 
-    print(app.routes)
     return app

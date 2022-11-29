@@ -11,6 +11,8 @@ readme = "README.md"
 license = { file="LICENSE" }
 dynamic = ["dependencies"]
 
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 
 [project.urls]
 "Homepage" = "https://github.com/strivesolutions/python-fastapi-framework"
