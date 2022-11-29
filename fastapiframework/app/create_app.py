@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from starlette.middleware import Middleware
 
 from fastapiframework.health.config import HealthConfig, set_health_config
-from fastapiframework.health.handler import health_app
+from fastapiframework.health.handler import health_handler
 
 
 @dataclass
@@ -25,7 +25,6 @@ def create_app(
     )
 
     set_health_config(options.health)
-
-    app.mount("/healthz", health_app)
+    app.add_api_route("/healthz", health_handler)  # type:ignore
 
     return app

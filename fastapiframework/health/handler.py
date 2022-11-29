@@ -9,8 +9,6 @@ from fastapiframework.health.health_check_result import HealthCheckResult
 from fastapiframework.health.health_checker import HealthChecker
 from fastapiframework.health.service_health import ServiceHealth
 
-health_app = FastAPI()
-
 
 async def run_checks(
     service_health: ServiceHealth,
@@ -51,7 +49,6 @@ async def run_checks(
             )
 
 
-@health_app.get("/")
 async def health_handler(response: Response) -> ServiceHealth:
     config = get_health_config()
 
