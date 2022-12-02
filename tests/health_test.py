@@ -4,7 +4,7 @@ from timeit import default_timer
 import pytest
 from fastapi.testclient import TestClient
 
-from fastapiframework import Options, create_app
+from fastapiframework import Options, create_server
 from fastapiframework.health.config import HealthConfig
 from fastapiframework.health.handler import run_checks
 from fastapiframework.health.health_check_result import HealthCheckResult
@@ -55,8 +55,8 @@ def test_healthz_handler_pass_gives_200():
 
     check = create_health_check("test", passing_check)
 
-    app = create_app(Options(health=HealthConfig("test service", checks=[check])))
-    client = TestClient(app)
+    server = create_server(Options(health=HealthConfig("test service", checks=[check])))
+    client = TestClient(server.app)
     response = client.get("/healthz")
     assert response.status_code == 200
 
@@ -67,8 +67,8 @@ def test_healthz_handler_fail_gives_500():
 
     check = create_health_check("test", failing_check)
 
-    app = create_app(Options(health=HealthConfig("test service", checks=[check])))
-    client = TestClient(app)
+    server = create_server(Options(health=HealthConfig("test service", checks=[check])))
+    client = TestClient(server.app)
     response = client.get("/healthz")
     assert response.status_code == 500
 
@@ -82,7 +82,7 @@ def test_healthz_checks_run_asynchronously():
     check1 = create_health_check("test", delayed_second_check)
     check2 = create_health_check("test", delayed_second_check)
 
-    app = create_app(
+    server = create_server(
         Options(
             health=HealthConfig(
                 "test service",
@@ -93,7 +93,7 @@ def test_healthz_checks_run_asynchronously():
             )
         )
     )
-    client = TestClient(app)
+    client = TestClient(server.app)
 
     start = default_timer()
     client.get("/healthz")

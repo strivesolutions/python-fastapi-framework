@@ -2,12 +2,21 @@ import asyncio
 from typing import Any, Coroutine, List
 
 from asyncer import asyncify
-from fastapi import Response
+from fastapi import Depends, FastAPI, Response
 
-from fastapiframework.health.config import get_health_config
+from fastapiframework.health.config import (
+    HealthConfig,
+    get_health_config,
+    set_health_config,
+)
 from fastapiframework.health.health_check_result import HealthCheckResult
 from fastapiframework.health.health_checker import HealthChecker
 from fastapiframework.health.service_health import ServiceHealth
+
+
+def add_health_handler(app: FastAPI, config: HealthConfig) -> None:
+    set_health_config(config)
+    app.add_api_route("/healthz", health_handler)  # type:ignore
 
 
 async def run_checks(
@@ -49,9 +58,10 @@ async def run_checks(
             )
 
 
-async def health_handler(response: Response) -> ServiceHealth:
-    config = get_health_config()
-
+async def health_handler(
+    response: Response,
+    config: HealthConfig = Depends(get_health_config),
+) -> ServiceHealth:
     service_health = ServiceHealth(service_name=config.service_name)
 
     await run_checks(service_health, config.checks)

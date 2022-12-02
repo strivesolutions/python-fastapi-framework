@@ -15,7 +15,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         except HTTPException as ex:
             if ex.status_code != status.HTTP_401_UNAUTHORIZED:
                 StriveLogger.error("HTTPException encountered during request", ex)
-            return Response(status_code=ex.status_code)
+            raise
+            # return Response(status_code=ex.status_code)
         except BaseException as ex:
             StriveLogger.error("Exception encountered during request", ex)
-            return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
