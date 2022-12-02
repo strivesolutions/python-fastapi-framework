@@ -2,11 +2,12 @@ from typing import Mapping
 
 import pytest
 from fastapi.testclient import TestClient
-from health.config import HealthConfig
-from health.health_check_result import HealthCheckResult
-from health.health_checker import create_health_check
 
 from fastapiframework import Options, create_server
+from fastapiframework.dapr.cloud_event import CloudEvent
+from fastapiframework.health.config import HealthConfig
+from fastapiframework.health.health_check_result import HealthCheckResult
+from fastapiframework.health.health_checker import create_health_check
 
 
 def passing_check(name: str) -> HealthCheckResult:
@@ -198,8 +199,8 @@ def test_anonymous_route(header, expected_code):
         pytest.param(None, 401, id="No token returns 401"),
         pytest.param(
             {
-                # this is a valid JWT from JWT.io, not from our service. It's just testing the token parsing.
-                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                # this is a valid JWT from JWT.io, not from our service. It's just testing the token parsing. # noqa
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"  # noqa
             },
             200,
             id="Valid token returns 200",
@@ -219,3 +220,56 @@ def test_secure_route(header, expected_code):
     response = client.get("/", headers=header)
 
     assert response.status_code == expected_code
+
+
+def test_add_event_handler():
+    server = create_server(
+        options=Options(
+            pubsub_name="pubsub",
+            health=mock_health_config,
+            enable_trust_fund_middleware=True,
+        )
+    )
+
+    @server.event("/", "test_topic")
+    def handler():
+        return "ok"
+
+    client = TestClient(server.app)
+    response = client.post("/")
+
+    assert response.status_code == 200
+
+    response = client.get("/dapr/subscribe")
+    assert response.status_code == 200
+
+
+def test_event_route_handling():
+    server = create_server(
+        options=Options(
+            pubsub_name="pubsub",
+            health=mock_health_config,
+            enable_trust_fund_middleware=True,
+        )
+    )
+
+    @server.event("/", "test_topic")
+    def handler(event: CloudEvent):
+        return event.data.get("foo")
+
+    client = TestClient(server.app)
+    body = """
+{
+    "specversion" : "1.0",
+    "type" : "example.com.cloud.event",
+    "source" : "https://example.com/cloudevents/pull",
+    "subject" : "123",
+    "id" : "A234-1234-1234",
+    "time" : "2018-04-05T17:31:00Z",
+    "data" : { "foo": "bar" }
+}
+"""
+    response = client.post("/", content=body)
+
+    assert response.status_code == 200
+    assert response.text == '"bar"'

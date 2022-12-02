@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Optional
 
-from dapr.subscribe_handler import add_dapr_subscribe_handler
 from fastapi import FastAPI
 from starlette.middleware import Middleware
 
@@ -20,7 +19,6 @@ def create_server(options: Options, app: Optional[FastAPI] = None) -> Server:
     server = Server(options, app)
 
     add_health_handler(app, options.health)
-    add_dapr_subscribe_handler(app, options.pubsub_name)
 
     return server
 
@@ -29,7 +27,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         middleware=[
             Middleware(LoggingMiddleware),
-        ]
+        ],
     )
     app.router.redirect_slashes = False
     return app

@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Callable, Literal, Optional
 
+from dapr.ext.fastapi import DaprApp
 from fastapi import Depends, FastAPI
 from fastapi.types import DecoratedCallable
 
@@ -22,7 +23,11 @@ class Server:
     def __init__(self, options: Options, app: FastAPI):
         self.options = options
         self.app = app
+        self.dapr = DaprApp(app)
         self._pubsub_configured = options.pubsub_name is not None
+
+    def add_middleware(self, middleware: type, **options: Any) -> None:
+        self.app.add_middleware(middleware, **options)
 
     def add_route(
         self,
@@ -86,5 +91,9 @@ class Server:
             path, "DELETE", anonymous=anonymous, check_trust_id=check_trust_id
         )
 
-    def add_middleware(self, middleware: type, **options: Any) -> None:
-        self.app.add_middleware(middleware, **options)
+    def event(self, path: str, topic: str) -> Callable:
+        return self.dapr.subscribe(
+            pubsub=self.options.pubsub_name,
+            topic=topic,
+            route=path,
+        )
