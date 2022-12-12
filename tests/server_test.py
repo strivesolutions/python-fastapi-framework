@@ -1,6 +1,7 @@
 from typing import Mapping
 
 import pytest
+from fastapi import Response
 from fastapi.testclient import TestClient
 
 from fastapiframework import Options, create_server
@@ -10,6 +11,7 @@ from fastapiframework.health.health_check_result import HealthCheckResult
 from fastapiframework.health.health_checker import create_health_check
 from fastapiframework.models.camel_case_model import CamelCaseModel
 from fastapiframework.pubsub.data_request_payload import DataRequestEvent
+from fastapiframework.pubsub.responses import fatal_event_error, retriable_event_error
 from fastapiframework.server.exceptions import PubSubConfigurationException
 
 
@@ -326,3 +328,41 @@ def test_event_handling_data_request_payload():
 
     assert response.status_code == 200
     assert response.text == '"bar"'
+
+
+def test_event_handler_response_retry():
+    server = create_server(
+        options=Options(
+            pubsub_name="pubsub",
+            health=mock_health_config,
+            enable_trust_fund_middleware=True,
+        )
+    )
+
+    @server.event("/", "test_topic")
+    def handler(response: Response):
+        return retriable_event_error(response)
+
+    client = TestClient(server.app)  # noqa
+    response = client.post("/", content=None)
+
+    assert response.status_code == 500
+
+
+def test_event_handler_response_fatal():
+    server = create_server(
+        options=Options(
+            pubsub_name="pubsub",
+            health=mock_health_config,
+            enable_trust_fund_middleware=True,
+        )
+    )
+
+    @server.event("/", "test_topic")
+    def handler(response: Response):
+        return fatal_event_error(response)
+
+    client = TestClient(server.app)  # noqa
+    response = client.post("/", content=None)
+
+    assert response.status_code == 404
