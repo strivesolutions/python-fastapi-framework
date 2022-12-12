@@ -71,6 +71,6 @@ def create_cloud_event(source: str, data_type: str, data: CamelCaseModel) -> Clo
             "type": data_type,
             "source": source,
         },
-        base64.b64encode(data.json()),
+        base64.b64encode(data.json().encode("utf-8")),
         # data,
     )
