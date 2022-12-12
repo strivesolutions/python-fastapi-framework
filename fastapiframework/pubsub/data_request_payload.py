@@ -4,9 +4,9 @@ import base64
 import json
 from typing import Type, TypeVar
 
+from cloudevents.pydantic import CloudEvent
 from pydantic import BaseModel
 
-from fastapiframework.dapr.cloud_event import CloudEvent
 from fastapiframework.models.camel_case_model import CamelCaseModel
 
 T = TypeVar("T", bound=CamelCaseModel)

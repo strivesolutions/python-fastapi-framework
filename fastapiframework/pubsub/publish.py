@@ -1,4 +1,6 @@
-from fastapiframework.dapr.cloud_event import CloudEvent
+# from fastapiframework.dapr.cloud_event import CloudEvent
+from cloudevents.pydantic import CloudEvent
+
 from fastapiframework.models.camel_case_model import CamelCaseModel
 from fastapiframework.pubsub.data_request_payload import DataRequestPayload
 from fastapiframework.server.exceptions import PubSubConfigurationException
@@ -27,7 +29,7 @@ class DaprPublisher(Publisher):
                 "pubsub_name is not initialized, unable to publish event"
             )
 
-        event = CloudEvent.new_json(data=data)
+        event = CloudEvent({"datacontenttype": "application/json"}, data)
 
         from dapr.clients import DaprClient
 
@@ -35,8 +37,7 @@ class DaprPublisher(Publisher):
             client.publish_event(
                 self.pubsub_name,
                 topic,
-                event.json(),
-                data_content_type="application/json",
+                event,
             )
 
     def publish_data_payload(
