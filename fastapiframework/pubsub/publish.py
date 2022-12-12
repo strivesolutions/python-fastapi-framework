@@ -1,4 +1,5 @@
 # from fastapiframework.dapr.cloud_event import CloudEvent
+import base64
 from typing import Optional
 
 from cloudevents.pydantic import CloudEvent
@@ -46,7 +47,7 @@ class DaprPublisher(Publisher):
             client.publish_event(
                 self.pubsub_name,
                 topic,
-                event,
+                event.json(),
             )
 
     def publish_data_payload(
@@ -70,5 +71,6 @@ def create_cloud_event(source: str, data_type: str, data: CamelCaseModel) -> Clo
             "type": data_type,
             "source": source,
         },
-        data.json(),
+        base64.b64encode(data.json()),
+        # data,
     )
