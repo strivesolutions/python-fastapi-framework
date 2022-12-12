@@ -1,25 +1,11 @@
 # from fastapiframework.dapr.cloud_event import CloudEvent
 import base64
-from typing import Optional
-
-from cloudevents.pydantic import CloudEvent
 
 from fastapiframework.models.camel_case_model import CamelCaseModel
 from fastapiframework.pubsub.data_request_payload import DataRequestPayload
 from fastapiframework.server.exceptions import PubSubConfigurationException
 
-
-class Publisher:
-    def publish_event(self, topic: str, event: CamelCaseModel) -> None:
-        raise NotImplementedError()
-
-    def publish_data_payload(
-        self,
-        topic: str,
-        correlation_id: str,
-        event_data: CamelCaseModel,
-    ) -> None:
-        raise NotImplementedError()
+from .publisher import Publisher
 
 
 class DaprPublisher(Publisher):
@@ -30,16 +16,12 @@ class DaprPublisher(Publisher):
     def publish_event(
         self,
         topic: str,
-        data: CamelCaseModel,
-        data_type: Optional[str] = None,
+        event: CamelCaseModel,
     ) -> None:
         if not self.pubsub_name:
             raise PubSubConfigurationException(
                 "pubsub_name is not initialized, unable to publish event"
             )
-
-        data_type = data_type or type(data).__name__
-        event = create_cloud_event(self.service_name, data_type, data)
 
         from dapr.clients import DaprClient
 
@@ -58,19 +40,7 @@ class DaprPublisher(Publisher):
     ) -> None:
         payload = DataRequestPayload(
             correlation_id=correlation_id,
-            data=data,
+            data=base64.b64encode(data.json().encode("utf-8")),
         )
 
-        return self.publish_event(topic, payload, type(data).__name__)
-
-
-def create_cloud_event(source: str, data_type: str, data: CamelCaseModel) -> CloudEvent:
-    return CloudEvent(
-        {
-            "datacontenttype": "application/json",
-            "type": data_type,
-            "source": source,
-        },
-        base64.b64encode(data.json().encode("utf-8")),
-        # data,
-    )
+        return self.publish_event(topic, payload)
