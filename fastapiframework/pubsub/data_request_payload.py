@@ -32,3 +32,20 @@ class DataRequestPayload(CamelCaseModel):
         assert issubclass(cls, BaseModel), "cls must be of type BaseModel"
 
         return cls.parse_obj(self.data)
+
+
+class DataRequestEventData(CamelCaseModel):
+    correlation_id: str
+    data: str
+
+
+class DataRequestEvent(CloudEvent):
+    data: DataRequestEventData  # type: ignore
+
+    def unwrap_as(self, cls: Type[T]) -> T:
+        assert issubclass(cls, BaseModel), "cls must be of type BaseModel"
+
+        data = base64.b64decode(self.data.data)
+        data = json.loads(data)
+
+        return cls.parse_obj(data)

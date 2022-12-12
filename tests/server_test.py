@@ -8,6 +8,8 @@ from fastapiframework.dapr.cloud_event import CloudEvent
 from fastapiframework.health.config import HealthConfig
 from fastapiframework.health.health_check_result import HealthCheckResult
 from fastapiframework.health.health_checker import create_health_check
+from fastapiframework.models.camel_case_model import CamelCaseModel
+from fastapiframework.pubsub.data_request_payload import DataRequestEvent
 from fastapiframework.server.exceptions import PubSubConfigurationException
 
 
@@ -289,3 +291,38 @@ def test_event_configuration_error_when_pubsub_name_not_set():
         @server.event("/", "test_topic")
         def handler(event: CloudEvent):
             return event.data.get("foo")
+
+
+def test_event_handling_data_request_payload():
+    server = create_server(
+        options=Options(
+            pubsub_name="pubsub",
+            health=mock_health_config,
+            enable_trust_fund_middleware=True,
+        )
+    )
+
+    class DataModel(CamelCaseModel):
+        foo: str
+
+    @server.event("/", "test_topic")
+    def handler(event: DataRequestEvent):
+        payload = event.unwrap_as(DataModel)
+        return payload.foo
+
+    client = TestClient(server.app)
+    body = """
+{
+    "specversion" : "1.0",
+    "type" : "example.com.cloud.event",
+    "source" : "https://example.com/cloudevents/pull",
+    "subject" : "123",
+    "id" : "A234-1234-1234",
+    "time" : "2018-04-05T17:31:00Z",
+    "data" : {"correlationId": "96ab7b8e-88b6-4d8a-86d4-0ab120ec6444", "data": "eyJmb28iOiJiYXIiLCJiYXoiOjk5fQ=="}
+}
+"""  # noqa
+    response = client.post("/", content=body)
+
+    assert response.status_code == 200
+    assert response.text == '"bar"'
