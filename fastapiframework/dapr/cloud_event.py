@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -8,7 +8,7 @@ class CloudEvent(BaseModel):
     source: str
     specversion: str
     type: str
-    data: Dict[str, Any]
+    data: dict
     datacontenttype: Optional[str]
     pubsubname: Optional[str]
     topic: Optional[str]
