@@ -1,11 +1,11 @@
 from typing import Mapping
 
 import pytest
+from cloudevents.pydantic import CloudEvent
 from fastapi import Response
 from fastapi.testclient import TestClient
 
 from fastapiframework import Options, create_server
-from fastapiframework.dapr.cloud_event import CloudEvent
 from fastapiframework.health.config import HealthConfig
 from fastapiframework.health.health_check_result import HealthCheckResult
 from fastapiframework.health.health_checker import create_health_check

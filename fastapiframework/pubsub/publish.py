@@ -20,8 +20,9 @@ class Publisher:
 
 
 class DaprPublisher(Publisher):
-    def __init__(self, pubsub_name: str):
+    def __init__(self, pubsub_name: str, service_name: str):
         self.pubsub_name = pubsub_name
+        self.service_name = service_name
 
     def publish_event(self, topic: str, data: CamelCaseModel) -> None:
         if not self.pubsub_name:
@@ -29,7 +30,7 @@ class DaprPublisher(Publisher):
                 "pubsub_name is not initialized, unable to publish event"
             )
 
-        event = CloudEvent({"datacontenttype": "application/json"}, data)
+        event = create_cloud_event(self.service_name, data)
 
         from dapr.clients import DaprClient
 
@@ -52,3 +53,14 @@ class DaprPublisher(Publisher):
         )
 
         return self.publish_event(topic, payload)
+
+
+def create_cloud_event(source: str, data: CamelCaseModel) -> CloudEvent:
+    CloudEvent(
+        {
+            "datacontenttype": "application/json",
+            "type": type(data).__name__,
+            "source": source,
+        },
+        data,
+    )
