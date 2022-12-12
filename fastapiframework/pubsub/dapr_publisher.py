@@ -1,6 +1,3 @@
-# from fastapiframework.dapr.cloud_event import CloudEvent
-import base64
-
 from fastapiframework.models.camel_case_model import CamelCaseModel
 from fastapiframework.pubsub.data_request_payload import DataRequestPayload
 from fastapiframework.server.exceptions import PubSubConfigurationException
@@ -38,9 +35,6 @@ class DaprPublisher(Publisher):
         correlation_id: str,
         data: CamelCaseModel,
     ) -> None:
-        payload = DataRequestPayload(
-            correlation_id=correlation_id,
-            data=base64.b64encode(data.json().encode("utf-8")),
-        )
+        payload = DataRequestPayload.create(correlation_id, data)
 
         return self.publish_event(topic, payload)

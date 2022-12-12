@@ -14,16 +14,18 @@ T = TypeVar("T", bound=CamelCaseModel)
 
 class DataRequestPayload(CamelCaseModel):
     correlation_id: str
-    data: dict
-
-
-class DataRequestEventData(CamelCaseModel):
-    correlation_id: str
     data: str
+
+    @staticmethod
+    def create(correlation_id: str, data: CamelCaseModel) -> DataRequestPayload:
+        return DataRequestPayload(
+            correlation_id=correlation_id,
+            data=base64.b64encode(data.json().encode("utf-8")),
+        )
 
 
 class DataRequestEvent(CloudEvent):
-    data: DataRequestEventData  # type: ignore
+    data: DataRequestPayload
 
     def unwrap_as(self, cls: Type[T]) -> T:
         assert issubclass(cls, BaseModel), "cls must be of type BaseModel"
