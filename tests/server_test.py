@@ -8,6 +8,7 @@ from fastapiframework.dapr.cloud_event import CloudEvent
 from fastapiframework.health.config import HealthConfig
 from fastapiframework.health.health_check_result import HealthCheckResult
 from fastapiframework.health.health_checker import create_health_check
+from fastapiframework.server.exceptions import PubSubConfigurationException
 
 
 def passing_check(name: str) -> HealthCheckResult:
@@ -273,3 +274,18 @@ def test_event_route_handling():
 
     assert response.status_code == 200
     assert response.text == '"bar"'
+
+
+def test_event_configuration_error_when_pubsub_name_not_set():
+    server = create_server(
+        options=Options(
+            health=mock_health_config,
+            enable_trust_fund_middleware=True,
+        )
+    )
+
+    with pytest.raises(PubSubConfigurationException):
+
+        @server.event("/", "test_topic")
+        def handler(event: CloudEvent):
+            return event.data.get("foo")

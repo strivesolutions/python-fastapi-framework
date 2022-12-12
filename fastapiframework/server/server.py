@@ -10,6 +10,7 @@ from fastapi.types import DecoratedCallable
 from fastapiframework.health.config import HealthConfig
 from fastapiframework.middleware.auth_middleware import check_token
 from fastapiframework.middleware.trust_fund_middleware import check_trust_fund_id
+from fastapiframework.server.exceptions import PubSubConfigurationException
 
 
 @dataclass
@@ -92,6 +93,10 @@ class Server:
         )
 
     def event(self, path: str, topic: str) -> Callable:
+        if not self.options.pubsub_name:
+            raise PubSubConfigurationException(
+                "pubsub_name was not provided on create server options, event handlers may not be used"
+            )
         return self.dapr.subscribe(
             pubsub=self.options.pubsub_name,
             topic=topic,
