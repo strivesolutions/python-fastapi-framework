@@ -27,6 +27,7 @@ class DaprPublisher(Publisher):
                 self.pubsub_name,
                 topic,
                 event.json(),
+                data_content_type="application/json",
             )
 
     def publish_data_payload(
