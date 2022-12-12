@@ -16,23 +16,6 @@ class DataRequestPayload(CamelCaseModel):
     correlation_id: str
     data: dict
 
-    @staticmethod
-    def from_event_data(source: dict) -> DataRequestPayload:
-        e = CloudEvent(**source)
-        correlation_id = e.data["correlationId"]
-        data = base64.b64decode(e.data["data"])
-        data = json.loads(data)
-
-        return DataRequestPayload(
-            correlation_id=correlation_id,
-            data=data,
-        )
-
-    def unwrap_as(self, cls: Type[T]) -> T:
-        assert issubclass(cls, BaseModel), "cls must be of type BaseModel"
-
-        return cls.parse_obj(self.data)
-
 
 class DataRequestEventData(CamelCaseModel):
     correlation_id: str
