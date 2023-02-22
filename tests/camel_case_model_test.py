@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapiframework.models.camel_case_model import CamelCaseModel
@@ -44,3 +45,20 @@ def test_json_does_not_include_null_values():
     d = json.loads(j)
 
     assert "fooBar" not in d
+
+
+def test_utc_serializes_with_z():
+    class TestModel(CamelCaseModel):
+        date: datetime
+
+    target = TestModel(
+        date=datetime(2023, 1, 1).replace(tzinfo=timezone.utc),
+    )
+
+    j = target.json()
+    d: dict = json.loads(j)
+
+    expected = "2023-01-01T00:00:00Z"
+    actual = d.get("date")
+
+    assert expected == actual
