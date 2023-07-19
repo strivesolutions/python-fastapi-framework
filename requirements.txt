@@ -8,5 +8,4 @@ pyjwt==2.6.0
 strivelogger==1.0.0
 uvicorn==0.20.0
 
-# TEMP
-../python-health-checks
+git+https://github.com/strivesolutions/python-health-checks@1.0.0

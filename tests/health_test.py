@@ -4,8 +4,8 @@ from timeit import default_timer
 import pytest
 from fastapi.testclient import TestClient
 from strivehealthchecks import (
+    HealthChecker,
     HealthCheckResult,
-    create_health_check,
 )
 
 from fastapiframework import Options, create_server
@@ -16,7 +16,7 @@ def test_healthz_handler_pass_gives_200():
     def passing_check(name: str) -> HealthCheckResult:
         return HealthCheckResult.ok(name)
 
-    check = create_health_check("test", passing_check)
+    check = HealthChecker("test", passing_check)
 
     server = create_server(Options(health=HealthConfig("test service", checks=[check])))
     client = TestClient(server.app)
@@ -28,7 +28,7 @@ def test_healthz_handler_fail_gives_500():
     def failing_check(name: str) -> HealthCheckResult:
         return HealthCheckResult.unhealthy(name, "test failure")
 
-    check = create_health_check("test", failing_check)
+    check = HealthChecker("test", failing_check)
 
     server = create_server(Options(health=HealthConfig("test service", checks=[check])))
     client = TestClient(server.app)
@@ -42,8 +42,8 @@ def test_healthz_checks_run_asynchronously():
         sleep(1)
         return HealthCheckResult.ok(name)
 
-    check1 = create_health_check("test", delayed_second_check)
-    check2 = create_health_check("test", delayed_second_check)
+    check1 = HealthChecker("test", delayed_second_check)
+    check2 = HealthChecker("test", delayed_second_check)
 
     server = create_server(
         Options(

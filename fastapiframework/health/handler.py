@@ -13,7 +13,7 @@ async def health_handler(
     response: Response,
     config: HealthConfig = Depends(get_health_config),
 ) -> dict:
-    result, healthy = await run_checks(config.service_name, config.checks)
+    result = await run_checks(config.service_name, config.checks)
 
-    response.status_code = 200 if healthy else 500
-    return result
+    response.status_code = 200 if result.healthy else 500
+    return result.to_dict()
