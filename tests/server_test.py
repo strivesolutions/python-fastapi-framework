@@ -4,11 +4,10 @@ import pytest
 from cloudevents.pydantic import CloudEvent
 from fastapi import Response
 from fastapi.testclient import TestClient
+from strivehealthchecks import HealthChecker, HealthCheckResult
 
 from fastapiframework import Options, create_server
 from fastapiframework.health.config import HealthConfig
-from fastapiframework.health.health_check_result import HealthCheckResult
-from fastapiframework.health.health_checker import create_health_check
 from fastapiframework.models.camel_case_model import CamelCaseModel
 from fastapiframework.pubsub.data_request_payload import DataRequestEvent
 from fastapiframework.pubsub.responses import fatal_event_error, retriable_event_error
@@ -19,7 +18,7 @@ def passing_check(name: str) -> HealthCheckResult:
     return HealthCheckResult.ok(name)
 
 
-mock_check = create_health_check("test", passing_check)
+mock_check = HealthChecker("test", passing_check)
 mock_health_config = HealthConfig("test service", checks=[mock_check])
 
 

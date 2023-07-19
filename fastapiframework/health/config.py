@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional
 
-from fastapiframework.health.health_checker import HealthChecker
+from strivehealthchecks import HealthChecker
 
 config: Optional[HealthConfig] = None
 
