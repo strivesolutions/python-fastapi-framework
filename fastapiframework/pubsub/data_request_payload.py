@@ -20,7 +20,7 @@ class DataRequestPayload(CamelCaseModel):
     def create(correlation_id: str, data: CamelCaseModel) -> DataRequestPayload:
         return DataRequestPayload(
             correlation_id=correlation_id,
-            data=base64.b64encode(data.json().encode("utf-8")),
+            data=str(base64.b64encode(data.json().encode("utf-8"))),
         )
 
 
@@ -33,4 +33,4 @@ class DataRequestEvent(CloudEvent):
         data = base64.b64decode(self.data.data)
         data = json.loads(data)
 
-        return cls.parse_obj(data)
+        return cls.model_validate(data)

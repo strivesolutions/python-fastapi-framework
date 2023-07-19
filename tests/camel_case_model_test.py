@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, timezone
+from decimal import Decimal
 from typing import Optional
 
 from fastapiframework.models.camel_case_model import CamelCaseModel
@@ -20,7 +21,7 @@ def test_can_initialize_field_with_camel_case():
     class TestModel(CamelCaseModel):
         foo_bar: str
 
-    target = TestModel.parse_obj({"fooBar": "baz"})
+    target = TestModel.model_validate({"fooBar": "baz"})
 
     expected = "baz"
     assert target.foo_bar == expected
@@ -30,7 +31,7 @@ def test_can_initialize_field_with_field_name():
     class TestModel(CamelCaseModel):
         foo_bar: str
 
-    target = TestModel.parse_obj({"foo_bar": "baz"})
+    target = TestModel.model_validate({"foo_bar": "baz"})
 
     expected = "baz"
     assert target.foo_bar == expected
@@ -62,3 +63,14 @@ def test_utc_serializes_with_z():
     actual = d.get("date")
 
     assert expected == actual
+
+
+def test_decimal_serializes_to_string():
+    class TestModel(CamelCaseModel):
+        foo_bar: Decimal = 1.25
+
+    target = TestModel()
+    j = target.json()
+    d = json.loads(j)
+
+    assert d.get("fooBar") == "1.25"
