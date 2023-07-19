@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastapiframework"
-version = "0.2.0"
-requires-python = ">=3.10"
+version = "2.0.0"
+requires-python = ">=3.11"
 description = "A flexible logging abstraction layer"
 readme = "README.md"
 license = { file="LICENSE" }
