@@ -1,7 +1,5 @@
 import requests
-
-from fastapiframework.health.health_check_result import HealthCheckResult
-from fastapiframework.health.health_checker import HealthChecker
+from strivehealthchecks import HealthChecker, HealthCheckResult
 
 
 def create_dapr_health_check(endpoint: str) -> HealthChecker:
