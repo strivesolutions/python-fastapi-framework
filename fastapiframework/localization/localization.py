@@ -11,7 +11,7 @@ class LocalizationHelper:
     _translations = {}
 
     def __init__(self, language_code: str = "en"):
-        if self._translations is None:
+        if not self._translations:
             raise Exception("Translations not loaded. Call LocalizationHelper.load_bundle() before creating an instance.")
         self.language_code = language_code
 
